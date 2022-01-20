@@ -2,6 +2,9 @@ import session from 'express-session';
 import { Request, Response, NextFunction } from 'express';
 import { JwtPayload } from 'jsonwebtoken';
 
+
+//types and interfaces globally declared below
+
 namespace NodeJS {
   interface ProcessEnv {
     NODE_ENV: string;

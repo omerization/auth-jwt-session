@@ -16,7 +16,7 @@ import auth from './middleware/auth';
 import mongoSession from 'connect-mongodb-session';
 
 
-
+//express configurations start
 const app = express();
 app.use(express.json());
 app.set('view engine', 'ejs');
