@@ -15,7 +15,7 @@ middleware.verifyJWTToken = (req: Request, res: Response, next: NextFunction) =>
   }
   try {
     const decoded = jwt.verify(token, process.env.TOKEN_KEY as string);
-    req.user  = decoded;
+    (<any>req).user  = decoded;
   } catch (err) {
     req.flash("error", "Geçersiz token");
     return res.redirect('/login');

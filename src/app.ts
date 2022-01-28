@@ -1,12 +1,11 @@
 
 //necessary imports:
-import express, { RequestHandler } from 'express';
-import { Request, Response, NextFunction } from 'express';
+import express, { Application, Request, Response,  NextFunction } from "express";
 import mongoose from 'mongoose';
 import session from 'express-session';
 import flash from 'connect-flash';
 import path from 'path';
-import User from './models/user.js'
+import User from './models/user'
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
 import bodyParser from 'body-parser';
@@ -17,7 +16,7 @@ import mongoSession from 'connect-mongodb-session';
 
 
 //express configurations start
-const app = express();
+const app: Application = express();
 app.use(express.json());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '/views'));
@@ -45,6 +44,12 @@ app.use(
     })
 );
 
+declare module 'express-session' {
+    export interface SessionData {
+        user: object;
+        isLoggedIn: boolean;
+    }
+  }
 
 app.use(function (req, res, next) {
     res.locals.currentUser = req.session.user;
@@ -65,17 +70,17 @@ async function main() {
 
 
 // '/' url route renders login page
-app.get('/', async (req, res) => {
+app.get('/', async (req: Request, res: Response) => {
     res.render('login');
 });
 
 // '/login' url route renders login page
-app.get('/login', async (req, res) => {
+app.get('/login', async (req: Request, res: Response) => {
     res.render('login');
 });
 
 // '/login' url post route 
-app.post('/login', async (req, res) => {
+app.post('/login', async (req: Request, res: Response) => {
     try {
         // Get user input
         const { email, password } = req.body;
@@ -102,7 +107,7 @@ app.post('/login', async (req, res) => {
 
             // token added to cookies
             res.cookie('authToken', token);
-            
+
             //save sessions
             req.session.isLoggedIn = true;
             req.session.user = user;
@@ -117,8 +122,8 @@ app.post('/login', async (req, res) => {
             res.redirect('/login');
         }
 
-    } catch (err) {
-          //if anything goes wrong, give feedback to user and redirect login page
+    } catch (err: any) {
+        //if anything goes wrong, give feedback to user and redirect login page
         console.log(err);
         req.flash("error", "Mail veya şifre yanlış.");
         res.redirect('/login');
@@ -126,12 +131,12 @@ app.post('/login', async (req, res) => {
 });
 
 // '/register' url get route 
-app.get('/register', async (req, res) => {
+app.get('/register', async (req: Request, res: Response) => {
     res.render('register');
 });
 
 // '/register' url post route 
-app.post('/register', async (req, res) => {
+app.post('/register', async (req: Request, res: Response) => {
     try {
         // Get user input
         const { first_name, last_name, email, password } = req.body;
@@ -183,7 +188,7 @@ app.post('/register', async (req, res) => {
 });
 
 // 'logout' get route
-app.get('/logout', function (req, res) {
+app.get('/logout', async (req: Request, res: Response) => {
     // removes sessions and gives succesful feedback to user
     req.flash("success", "Çıkış yaptınız");
     req.session.destroy(err => {
@@ -193,7 +198,7 @@ app.get('/logout', function (req, res) {
 });
 
 // '/users' get route, middlewares check JWT token and session info for authentication
-app.get('/users', [auth.verifyJWTToken, auth.isLoggedIn],  (req: any, res: any) => {
+app.get('/users', [auth.verifyJWTToken, auth.isLoggedIn], async (req: Request, res: Response) => {
     User.find({}, (err, users) => {
         if (err) {
             console.log(err);
@@ -206,18 +211,22 @@ app.get('/users', [auth.verifyJWTToken, auth.isLoggedIn],  (req: any, res: any) 
 });
 
 // '/user-agreement' get route
-app.get('/user-agreement', function (req, res) {
+app.get('/user-agreement', async (req: Request, res: Response) => {
     res.render('user-agreement');
 });
 
 // 404 error page
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
     res.status(404).render('404');
 });
 
 
 
 //express port selection
-app.listen(3001, function () {
-    console.log("Server has started");
-});
+try {
+    app.listen(3001, (): void => {
+        console.log(`Connected successfully on port 3001`);
+    });
+} catch (error: any) {
+    console.error(`Error occured: ${error.message}`);
+}

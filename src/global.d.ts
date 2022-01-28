@@ -13,18 +13,20 @@ namespace NodeJS {
   }
 }
 
-module 'express-session' {
+declare module 'express-session' {
   export interface SessionData {
-      user: object,
-      isLoggedIn: boolean
+      user: object;
+      isLoggedIn: boolean;
   }
 }
 
-module "express" { 
-  export interface Request {
-    user: string | JwtPayload
+declare global {
+  namespace Express {
+      interface Request {
+          user? : Record<string,any>
+      }
   }
 }
 
 
-export type MiddlewareFn = (req: Request, res: Response, next: NextFunction) => void;
+export {}
